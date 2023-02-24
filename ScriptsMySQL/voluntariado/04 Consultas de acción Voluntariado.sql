@@ -33,7 +33,6 @@ SET laboral.labor           = UPPER(labor),
     voluntarios_old.Deporte = UPPER(Deporte)
 WHERE voluntarios.idLabor = laboral.labor;
 
-
 /*
 69. Modificar el campo de Edad para que aparezca la edad exacta de la
 persona a fecha 13/12/1990.
@@ -45,7 +44,14 @@ SET v0.Edad =TIMESTAMPDIFF(YEAR, v0.FechaNacimiento, '1990-12-13');
 70. Seleccionar el campo de pais mostrando solo aquellos diferentes. Crear la
 tabla de paises con los registros seleccionados. (Voluntarios_OLD).
 */
-
+CREATE TABLE paises2
+(
+    ID         integer not null auto_increment primary key,
+    nombrePais varchar(40)
+);
+INSERT INTO paises2(nombrePais)
+    (SELECT DISTINCT Pais
+     FROM Voluntarios_OLD);
 
 /*
 71. Seleccionar el campo de pais y provincia mostrando sólo aquellas
@@ -262,12 +268,12 @@ UPDATE voluntarios_old AS v
 SET Puesto = 'Conducción'
 WHERE v.CarnetB = 'si'
   AND v.Idvoluntario IN (SELECT Idvoluntario
-                         FROM (SELECT v2.Idvoluntario
-                               FROM Voluntarios_OLD v2,
+                         FROM (SELECT v1.Idvoluntario
+                               FROM Voluntarios_OLD v1,
                                     nivel n
-                               WHERE v2.Idvoluntario = n.IdVoluntario
+                               WHERE v1.Idvoluntario = n.IdVoluntario
                                  AND n.hablado IN ('bajo', 'medio')
-                                 AND v2.Poblacion IN ('Jaca', 'Huesca', 'Zaragoza')) AS t1)
+                                 AND v1.Poblacion IN ('Jaca', 'Huesca', 'Zaragoza')) AS t1)
 LIMIT 60;
 
 /*
@@ -371,132 +377,878 @@ personas que practiquen esquí
 UPDATE voluntarios AS v
 SET Puesto = 'Apoyo'
 WHERE v.IdVoluntarios IN (SELECT IdVoluntarios
-                          FROM (SELECT v1.Deporte
-                                FROM voluntarios_old AS v1,
-                                     deportes AS d
-                                WHERE v1.Deporte = '%Esquí%') AS t1)
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios AS v1,
+                                     deportes AS d,
+                                     practicar AS p
+                                WHERE v1.IdVoluntarios = p.IdVoluntarios
+                                  AND p.IdDeportes = d.IdDeporte
+                                  AND d.deporte = '%esquí%')
+                                   AS t1)
 LIMIT 60;
 
 /*
 84. Asignar en la tabla voluntarios la columna puesto el valor “Accesos” a: 30
 personas mas altas.
 */
+UPDATE voluntarios v
+SET v.Puesto = 'Accesos'
+ORDER BY v.altura DESC
+LIMIT 30;
 
 
 /*
 85. Asignar en la tabla voluntarios la columna puesto el valor “Voluntarios” a:
 30 personas de menor peso
 */
-
+UPDATE voluntarios v
+SET v.Puesto = 'Voluntarios'
+WHERE v.peso != ''
+ORDER BY CAST(v.peso AS UNSIGNED) ASC
+LIMIT 30;
 
 /*
 86. Asignar en la tabla voluntarios la columna puesto el valor “Información” a:
 30 personas
 */
-
+UPDATE voluntarios v
+SET v.Puesto = 'Información'
+WHERE v.Puesto = ''
+LIMIT 30;
 
 /*
 87. Asignar en la tabla voluntarios la columna puesto el valor “Palacio de
 congresos” a personas con las siguientes tareas:
-a. 10 personas Traducción o Interprete ,
+a. 10 personas Traducción o Interprete
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Palacio de congresos'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre IN ('Traducción', 'Intérprete')
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 10;
+
+/*
 b. 4 sanitarios,
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Palacio de congresos'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Sanitaria'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 4;
+
+
+/*
 c. 10 administrativos,
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Palacio de congresos'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Administrativas'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 10;
+
+
+/*
 d. 5 información,
-C/ MARÍA AUXILIADORA 57 | 50009 ZARAGOZA | T 976 306 878 | HTTP://ZARAGOZA.SALESIANOS.EDU
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Palacio de congresos'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Información'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
+
+
+/*
 e. 5 informaticos,
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Palacio de congresos'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Informática'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
+
+/*
 f. 10 protocolo
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Palacio de congresos'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Protocolo'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 10;
+
+/*
 g. 5 logistica
 */
-
+UPDATE voluntarios v
+SET v.Puesto = 'Palacio de congresos'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Logístico'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
 
 /*
 88. Asigna en la tabla voluntarios la columna puesto el valor “Pista de Hielo”
 a personas con las siguientes tareas:
 a. 8 personas de Accesos,
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Pista de hielo'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Accesos'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 8;
+
+/*
 b. 8 personas de logística,
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Pista de hielo'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Logístico'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 8;
+
+/*
 c. 6 sanitarios ,
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Pista de hielo'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Sanitaria'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 6;
+/*
 d. 5 información,
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Pista de hielo'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Información'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
+
+/*
 e. 5 informaticos
 */
+UPDATE voluntarios v
+SET v.Puesto = 'Pista de hielo'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Informática'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
 
 
 /*
-89. Asigna en la tabla voluntarios la columna puesto el valor “Centro de
-Transporte” a personas con las siguientes tareas:
+89. Asigna en la tabla voluntarios la columna puesto el valor “Centro de Transporte” a personas con las siguientes tareas:
 a. 70 personas de conducción,
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Centro de Transporte'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Informática'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 70;
+
+/*
 b. 5 administrativos
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Centro de Transporte'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Administrativas'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
+
+/*
 c. 5 informaticos
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Centro de Transporte'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Informática'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
+
+/*
 d. 5 logistica
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Centro de Transporte'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Logístico'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
+
+/*
 e. 5 informacion
 */
-
+UPDATE voluntarios v
+SET v.Puesto = 'Centro de Transporte'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Información'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
 
 /*
-90. asigna en la tabla voluntarios la columna puesto el valor “Nave de
-Logistica” a personas con las siguientes tareas:
+90. asigna en la tabla voluntarios la columna puesto el valor “Nave de Logistica” a personas con las siguientes tareas:
 a. 2 personas de Accesos
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Nave de Logística'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Accesos'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 2;
+
+/*
 b. 30 promocion
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Nave de Logística'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Promoción'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 30;
+
+/*
 c. 5 logistica
 */
-
+UPDATE voluntarios v
+SET v.Puesto = 'Nave de Logística'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Logístico'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
 
 /*
-91. Asigna en la tabla voluntarios la columna puesto el valor “Escuela militar
-de montaña” a personas con las siguientes tareas:
+91. Asigna en la tabla voluntarios la columna puesto el valor “Escuela militar de montaña” a personas con las siguientes tareas:
 a. 5 Accesos
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'Escuela militar de montaña'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Accesos'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
+
+/*
 b. 30 voluntarios
 */
-
+UPDATE voluntarios v
+SET v.Puesto = 'Escuela militar de montaña'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Voluntarios'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 30;
 
 /*
-92. Asigna en la tabla voluntarios la columna puesto el valor “delegaciones”
-a personas con las siguientes tareas:
+92. Asigna en la tabla voluntarios la columna puesto el valor “delegaciones” a personas con las siguientes tareas:
 a. 43 personas de Traducción/Interprete
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'delegaciones'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre IN ('Traducción', 'Intérprete')
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 43;
+
+/*
 b. 10 protocolo
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'delegaciones'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Protocolo'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 10;
+
+/*
 c. 20 acompañantes
-C/ MARÍA AUXILIADORA 57 | 50009 ZARAGOZA | T 976 306 878 | HTTP://ZARAGOZA.SALESIANOS.EDU
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'delegaciones'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Acompañantes'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 20;
+
+/*
 d. 7 logistica
+*/
+UPDATE voluntarios v
+SET v.Puesto = 'delegaciones'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Logístico'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 7;
+/*
 e. 5 comunicación
 */
+UPDATE voluntarios v
+SET v.Puesto = 'delegaciones'
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Comunicación'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
 
 
 /*
-93. Asigna en la tabla voluntarios la localidad “Berja” a personas con las
-siguientes tareas:
+93. Asigna en la tabla voluntarios la localidad “Berja” a personas con las siguientes tareas:
 a. 12 personas Apoyo
+ */
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Berja')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Apoyo'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 12;
+
+/*
 b. 4 sanitarios
+*/
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Berja')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Sanitaria'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 4;
+
+/*
 c. 3 informacion
+*/
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Berja')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Información'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 3;
+
+/*
 d. 5 comunicacion
+*/
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Berja')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Comunicación'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
+
+/*
 e. 3 accesos
 */
 
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Berja')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Accesos'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 3;
+
 /*
-94. Asigna en la tabla voluntarios la localidad “Jaca” a personas con las
-siguientes tareas:
+94. Asigna en la tabla voluntarios la localidad “Jaca” a personas con las siguientes tareas:
 a. 12 personas Apoyo
+*/
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Jaca')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Apoyo'
+                                  AND v1.Puesto = '') AS t)
+LIMIT 12;
+
+/*
 b. 4 sanitarios
+*/
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Jaca')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Sanitaria'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 4;
+
+/*
 c. 3 informacion
+*/
+
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Jaca')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Información'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 3;
+
+/*
 d. 5 comunicacion
+*/
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Jaca')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Comunicación'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
+
+/*
+e. 3 accesos
+*/
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Jaca')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Accesos'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 3;
+
+
+/*
+95. Asigna en la tabla voluntarios la localidad “Formentera” a personas con las siguientes tareas:
+a. 12 personas Apoyo
+*/
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Formentera')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Apoyo'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 12;
+
+/*
+b. 4 sanitarios
+*/
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Formentera')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Sanitaria'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 4;
+
+/*
+c. 3 informacion
+*/
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Formentera')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Información'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 3;
+
+/*
+d. 5 comunicacion
+*/
+
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Formentera')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Comunicación'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
+
+/*
 e. 3 accesos
 */
 
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Formentera')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Accesos'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 3;
+
 
 /*
-95. Asigna en la tabla voluntarios la localidad “Formentera” a personas con
-las siguientes tareas:
+96. Asigna la tarea (entiendo que será la localidad) de Panticosa a personas con las siguientes tareas:
 a. 12 personas Apoyo
+*/
+
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Panticosa')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Apoyo'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 12;
+
+/*
 b. 4 sanitarios
+*/
+
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Panticosa')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Sanitaria'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 4;
+
+/*
 c. 3 informacion
+*/
+
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Panticosa')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Información'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 3;
+
+/*
 d. 5 comunicacion
+*/
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Panticosa')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Comunicación'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 5;
+
+/*
 e. 3 accesos
 */
 
-
-/*
-96. Asigna la tarea de Panticosa a personas con las siguientes tareas:
-a. 12 personas Apoyo
-b. 4 sanitarios
-c. 3 informacion
-d. 5 comunicacion
-e. 3 accesoS
-*/
+UPDATE voluntarios v
+SET v.idLocalidad =
+        (SELECT idLocalidad
+         FROM localidades
+         WHERE localidad = 'Panticosa')
+WHERE v.IdVoluntarios IN (SELECT v.IdVoluntarios
+                          FROM (SELECT v1.IdVoluntarios
+                                FROM voluntarios v1,
+                                     preferencias p,
+                                     tareas t
+                                WHERE v1.IdVoluntarios = p.IdVoluntario
+                                  AND p.IdTarea = t.IdTarea
+                                  AND t.nombre = 'Accesos'
+                                  AND v1.Puesto = '') AS t1)
+LIMIT 3;
