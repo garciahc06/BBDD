@@ -136,33 +136,11 @@ WHERE v.IdVoluntarios = n.IdVoluntario
   AND i.idioma = 'Inglés'
 LIMIT 39;
 
-INSERT INTO preferencias(IdTarea, IdVoluntario)
-SELECT 4, v.IdVoluntarios
-FROM voluntarios v,
-     nivel n,
-     idiomas i
-WHERE v.IdVoluntarios = n.IdVoluntario
-  AND n.IdIdioma = i.Ididioma
-  AND n.hablado = 'Alto'
-  AND i.idioma = 'Inglés'
-LIMIT 39;
-
 /*
 b. 10 personas que tengan nivel Alto de francés HABLADO.
 */
 INSERT INTO preferencias(IdTarea, IdVoluntario)
 SELECT 3, v.IdVoluntarios
-FROM voluntarios v,
-     nivel n,
-     idiomas i
-WHERE v.IdVoluntarios = n.IdVoluntario
-  AND n.IdIdioma = i.Ididioma
-  AND n.hablado = 'Alto'
-  AND i.idioma = 'Francés'
-LIMIT 10;
-
-INSERT INTO preferencias(IdTarea, IdVoluntario)
-SELECT 4, v.IdVoluntarios
 FROM voluntarios v,
      nivel n,
      idiomas i

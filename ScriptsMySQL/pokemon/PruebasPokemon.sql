@@ -81,3 +81,79 @@ SELECT p.*, p.peso / (p.altura * p.altura) AS IMC
 FROM pokemon AS p
 ORDER BY IMC DESC;
 
+
+/*
+Crea 2 tablas llamadas Estadisticas_Altas y Estadisticas_Bajas. En la primera guardaremos los datos de ataque, defensa y su media si es superior de 55.
+En la segunda si es inferior
+*/
+ CREATE TABLE Estadisticas_Altas(
+    numero_pokedex  INT           NOT NULL PRIMARY KEY,
+    nombre          VARCHAR(30)   NOT NULL,
+    ataque          INT           NOT NULL,
+    defensa         INT           NOT NULL,
+    media           DOUBLE        NOT NULL
+ );
+
+CREATE TABLE Estadisticas_Bajas (
+     numero_pokedex  INT           NOT NULL PRIMARY KEY,
+    nombre          VARCHAR(30)   NOT NULL,
+    ataque          INT           NOT NULL,
+    defensa         INT           NOT NULL,
+    media           DOUBLE        NOT NULL
+);
+
+INSERT INTO Estadisticas_Altas
+SELECT eb.numero_pokedex, p.nombre, eb.ataque, eb.defensa, (eb.ataque + eb.defensa) / 2 AS media
+FROM pokemon AS p,
+     estadistica_base AS eb
+WHERE p.numero_pokedex = eb.numero_pokedex
+  AND ((eb.ataque + eb.defensa) / 2) > 50;
+
+INSERT INTO Estadisticas_Bajas
+SELECT eb.numero_pokedex, p.nombre, eb.ataque, eb.defensa, (eb.ataque + eb.defensa) / 2 AS media
+FROM pokemon AS p,
+     estadistica_base AS eb
+WHERE p.numero_pokedex = eb.numero_pokedex
+  AND ((eb.ataque + eb.defensa) / 2) < 50;
+
+/*
+Renombrar a todos los pokemons con su nombre y "(F)", los que sea nde tipo fuego
+*/
+UPDATE pokemon AS p
+SET p.nombre = CONCAT(p.nombre, '(F)')
+WHERE p.numero_pokedex IN (SELECT p2.numero_pokedex
+                           FROM pokemon AS p2,
+                                pokemon_tipo AS pt,
+                                tipo AS t
+                           WHERE p2.numero_pokedex = pt.numero_pokedex
+                              AND pt.id_tipo = t.id_tipo
+                              AND t.nombre = 'Fuego');
+
+/*
+Crear un campo en la tabla pokemon "Observaciones" y añadir en ese campo, aquellos tipos que los pokemons sean de Planta y Veneno .
+*/
+
+ALTER TABLE pokemon
+ADD Observaciones VARCHAR(50) NOT NULL;
+
+INSERT INTO Observaciones
+SELECT p.numero_pokedex, t.nombre
+FROM pokemon AS p,
+     pokemon_tipo AS pt,
+     tipo AS t
+WHERE p.numero_pokedex = pt.numero_pokedex
+  AND pt.id_tipo = t.id_tipo
+  AND t.nombre = 'Planta'
+  AND p.numero_pokedex IN (SELECT
+                           FROM pokemon AS p2,
+                                pokemon_tipo AS pt2,
+                                tipo AS t2
+                            WHERE p.numero_pokedex = pt.numero_pokedex
+                              AND pt.id_tipo = t.id_tipo
+                              AND t.nombre = 'Veneno'
+                              AND p.numero_pokedex);
+
+
+/*
+
+*/
