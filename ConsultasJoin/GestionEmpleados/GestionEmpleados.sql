@@ -7,6 +7,11 @@ FROM empleado AS e
          INNER JOIN departamento d
                     ON e.id_departamento = d.id;
 
+-- SIN JOIN
+SELECT e.nombre, e.apellido1, e.apellido2, d.nombre, d.presupuesto, d.gastos
+FROM empleado AS e, departamento AS d
+WHERE e.id_departamento = d.id;
+
 /*
 Devuelve un listado con los empleados y los datos de los departamentos donde trabaja cada uno.
 Ordena el resultado, en primer lugar por el nombre del departamento (en orden alfabético)
@@ -18,6 +23,13 @@ FROM empleado AS e
                     ON e.id_departamento = d.id
 ORDER BY d.nombre, e.apellido1, e.apellido2, e.nombre;
 
+-- SIN JOIN
+SELECT e.nombre, e.apellido1, e.apellido2, d.nombre, d.presupuesto, d.gastos
+FROM empleado AS e, departamento AS d
+WHERE e.id_departamento = d.id
+ORDER BY d.nombre, e.apellido1, e.apellido2, e.nombre;
+
+
 /*
 Devuelve un listado con el identificador y el nombre del departamento,
 solamente de aquellos departamentos que tienen empleados.
@@ -26,6 +38,12 @@ SELECT d.id, d.nombre
 FROM departamento AS d
          INNER JOIN empleado e
                     ON d.id = e.id_departamento
+GROUP BY d.id, d.nombre;
+
+-- SIN JOIN
+SELECT d.id, d.nombre
+FROM departamento AS d, empleado AS e
+WHERE d.id = e.id_departamento
 GROUP BY d.id, d.nombre;
 
 /*
@@ -40,6 +58,12 @@ FROM departamento AS d
                     ON d.id = e.id_departamento
 GROUP BY d.id, d.nombre, d.presupuesto, d.gastos;
 
+-- SIN JOIN
+SELECT d.id, d.nombre, d.presupuesto - d.gastos AS presupuesto_actual
+FROM departamento AS d, empleado AS e
+WHERE d.id = e.id_departamento
+GROUP BY d.id, d.nombre, d.presupuesto, d.gastos;
+
 /*
 Devuelve el nombre del departamento donde trabaja el empleado que tiene el nif 38382980M.
 */
@@ -48,6 +72,12 @@ FROM departamento AS d
          INNER JOIN empleado AS e
                     ON d.id = e.id_departamento
 WHERE e.nif = '38382980M';
+
+-- SIN JOIN
+SELECT d.nombre
+FROM departamento AS d, empleado AS e
+WHERE d.id = e.id_departamento
+  AND e.nif = '38382980M';
 
 /*
 Devuelve el nombre del departamento donde trabaja el empleado Pepe Ruiz Santana.
@@ -60,6 +90,15 @@ WHERE e.nombre = 'Pepe'
   AND e.apellido1 = 'Ruiz'
   AND e.apellido2 = 'Santana';
 
+-- SIN JOIN
+SELECT d.nombre
+FROM departamento AS d, empleado AS e
+WHERE d.id = e.id_departamento
+  AND e.nombre = 'Pepe'
+  AND e.apellido1 = 'Ruiz'
+  AND e.apellido2 = 'Santana';
+
+
 /*
 Devuelve un listado con los datos de los empleados que trabajan en el departamento de I+D.
 Ordena el resultado alfabéticamente.
@@ -69,6 +108,13 @@ FROM empleado AS e
          INNER JOIN departamento AS d
                     ON e.id_departamento = d.id
 WHERE d.nombre = 'I+D'
+ORDER BY e.apellido1, e.apellido2, e.nombre;
+
+-- SIN JOIN
+SELECT e.nombre, e.apellido1, e.apellido2, e.nif
+FROM empleado AS e, departamento AS d
+WHERE e.id_departamento = d.id
+  AND d.nombre = 'I+D'
 ORDER BY e.apellido1, e.apellido2, e.nombre;
 
 /*
@@ -82,6 +128,13 @@ FROM empleado AS e
 WHERE d.nombre IN ('Sistemas', 'Contabilidad', 'I+D')
 ORDER BY e.apellido1, e.apellido2, e.nombre;
 
+-- SIN JOIN
+SELECT e.nombre, e.apellido1, e.apellido2, e.nif, d.nombre
+FROM empleado AS e, departamento AS d
+WHERE e.id_departamento = d.id
+  AND d.nombre IN ('Sistemas', 'Contabilidad', 'I+D')
+ORDER BY e.apellido1, e.apellido2, e.nombre;
+
 /*
 Devuelve una lista con el nombre de los empleados que tienen los departamentos que no tienen un
 presupuesto entre 100000 y 200000 euros.
@@ -91,6 +144,12 @@ FROM empleado AS e
          INNER JOIN departamento AS d
                 ON e.id_departamento = d.id
 WHERE d.presupuesto NOT BETWEEN 100000 AND 200000;
+
+-- SIN JOIN
+SELECT e.nombre, e.apellido1, e.apellido2, e.nif, d.nombre, d.presupuesto
+FROM empleado AS e, departamento AS d
+WHERE e.id_departamento = d.id
+  AND d.presupuesto NOT BETWEEN 100000 AND 200000;
 
 /*
 Devuelve un listado con el nombre de los departamentos donde existe algún empleado cuyo segundo
@@ -103,6 +162,12 @@ FROM departamento AS d
 WHERE e.apellido2 IS NULL
 GROUP BY d.nombre;
 
+-- SIN JOIN
+SELECT d.nombre
+FROM departamento AS d, empleado AS e
+WHERE d.id = e.id_departamento
+  AND e.apellido2 IS NULL
+GROUP BY d.nombre;
 
 -- COMPOSICION EXTERNA
 /*
