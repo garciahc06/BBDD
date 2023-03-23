@@ -116,7 +116,7 @@ SELECT p.nombre, p.precio, f.nombre AS fabricante
 FROM producto AS p
          INNER JOIN fabricante AS f
                     ON p.id_fabricante = f.id
-WHERE p.precio >= 180
+WHERE p.precio >= 180;
 
 /*
 Devuelve un listado con el identificador y el nombre de fabricante, solamente
@@ -127,3 +127,27 @@ FROM fabricante AS f
          INNER JOIN producto AS p
                     ON f.id = p.id_fabricante
 GROUP BY f.id;
+
+/*
+Devuelve un listado de todos los fabricantes que existen en la base de datos,
+junto con los productos que tiene cada uno de ellos.
+El listado deberá mostrar también aquellos fabricantes que no tienen productos asociados.
+*/
+SELECT f.id, f.nombre AS fabricante, p.nombre AS producto
+FROM fabricante AS f
+         LEFT JOIN producto AS p
+                   ON f.id = p.id_fabricante;
+
+/*
+Devuelve un listado donde sólo aparezcan aquellos fabricantes que no tienen ningún producto asociado.
+*/
+SELECT f.id, f.nombre AS fabricante
+FROM fabricante AS f
+         LEFT JOIN producto AS p
+                   ON f.id = p.id_fabricante
+WHERE p.id IS NULL;
+
+/*
+¿Pueden existir productos que no estén relacionados con un fabricante? Justifique su respuesta.
+ */
+-- Sí, porque un producto puede no tener fabricante.
