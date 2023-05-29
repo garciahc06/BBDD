@@ -1,0 +1,21 @@
+#panelAgregar, #tablaAgregar, #header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 330px;
+    width: 300px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: black 2px solid;
+    border-radius: 10px;
+}
+
+#header {
+    background-color: red;
+    height: 50px;
+    width: 300px;
+    top: 25px;
+    border: black 2px solid;
+}
