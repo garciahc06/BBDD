@@ -152,8 +152,3 @@ WHERE p.numero_pokedex = pt.numero_pokedex
                               AND pt.id_tipo = t.id_tipo
                               AND t.nombre = 'Veneno'
                               AND p.numero_pokedex);
-
-
-/*
-
-*/
